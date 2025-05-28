@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Email configuration using Gmail
+// Email setup with Gmail
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -17,29 +17,33 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Function to send styled HTML email
-function sendOrderEmails(orderDetails, customerEmail, customerName, shippingAddress) {
+// Function to send order confirmation and notification emails
+function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount) {
+  const itemList = cart.map(item => `<li>${item.quantity} × ${item.name} - $${item.price.toFixed(2)}</li>`).join('');
   const orderHtml = `
-    <h2>Thank you for your order, ${customerName}!</h2>
-    <p>Your order has been received and is being processed. Below are your order details:</p>
-    <p><strong>Shipping Address:</strong> ${shippingAddress}</p>
-    <h3>Order Items:</h3>
-    <ul>
-      ${orderDetails.map(item => `<li>${item.quantity} x ${item.name} - $${item.price}</li>`).join('')}
-    </ul>
-    <p><strong>Total:</strong> $${orderDetails.reduce((acc, item) => acc + item.quantity * item.price, 0).toFixed(2)}</p>
-    <p>We appreciate your business!</p>
+    <h2>Order Confirmation - Sandy's Max</h2>
+    <p>Hi ${customerName},</p>
+    <p>Thanks for your order! Here's what we received:</p>
+    <h3>Shipping Info:</h3>
+    <p>${shippingAddress}</p>
+
+    <h3>Items:</h3>
+    <ul>${itemList}</ul>
+    <p><strong>Total Charged:</strong> $${totalAmount.toFixed(2)}</p>
+
+    <p>Your order is now being processed. We'll notify you once it's shipped.</p>
+    <p>Thank you for shopping with Sandy's Max!</p>
   `;
 
-  // Email to customer
+  // Email to Customer
   transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: customerEmail,
-    subject: 'Your Sandy\'s Max Order Confirmation',
+    subject: "Your Sandy's Max Order Receipt",
     html: orderHtml,
   });
 
-  // Email to producer
+  // Email to Producer
   transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: 'sandykoromago2store@gmail.com',
@@ -53,20 +57,24 @@ app.post('/create-payment-intent', async (req, res) => {
     const { amount, cart, customerEmail, customerName, shippingAddress } = req.body;
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount, // in cents
       currency: 'usd',
-      payment_method_types: ['card'],
+      automatic_payment_methods: { enabled: true }
     });
 
-    // Send confirmation emails
-    sendOrderEmails(cart, customerEmail, customerName, shippingAddress);
+    // Convert amount back to dollars for email
+    const totalAmount = amount / 100;
+
+    // Send emails
+    sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount);
 
     res.send({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error("Payment error:", error);
     res.status(500).send({ error: error.message });
   }
 });
 
+// Run server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
