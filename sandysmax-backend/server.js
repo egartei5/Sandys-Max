@@ -56,9 +56,26 @@ app.post('/create-payment-intent', async (req, res) => {
   try {
     const { amount, cart, customerEmail, customerName, shippingAddress } = req.body;
 
+    // Prepare cart summary for Stripe metadata
+    const cartSummary = cart.map(item => `${item.name} x${item.quantity}`).join(', ');
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount, // in cents
       currency: 'usd',
+      description: `Order from Sandy's Max by ${customerName}`,
+      shipping: {
+        name: customerName,
+        address: {
+          line1: shippingAddress
+        }
+      },
+      receipt_email: customerEmail,
+      metadata: {
+        customerName,
+        customerEmail,
+        shippingAddress,
+        order: cartSummary // This will show the bag names and quantities in Stripe
+      },
       automatic_payment_methods: { enabled: true }
     });
 
