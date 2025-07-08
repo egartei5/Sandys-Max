@@ -1,19 +1,35 @@
-// Add to Cart Function
-function addToCart(productName, price, image = "") {
+// ✅ Get Active Image and Color
+function getCurrentImage(sliderId) {
+  const slider = document.getElementById(sliderId);
+  const activeImg = slider.querySelector("img.active");
+  return {
+    image: activeImg.src,
+    color: activeImg.alt || "Unknown"
+  };
+}
+
+// ✅ Add to Cart Function (with color)
+function addToCart(productName, price, imageData = {}) {
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const existingItem = cart.find(item => item.name === productName);
+  const existingItem = cart.find(item => item.name === productName && item.color === imageData.color);
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
-    cart.push({ name: productName, price: price, quantity: 1, image: image });
+    cart.push({
+      name: productName,
+      price: price,
+      quantity: 1,
+      image: imageData.image,
+      color: imageData.color
+    });
   }
 
   localStorage.setItem("cart", JSON.stringify(cart));
-  alert(`${productName} added to cart!`);
+  alert(`${productName} (${imageData.color}) added to cart!`);
 }
 
-// Display Cart Items on cart.html
+// ✅ Display Cart Items on cart.html
 document.addEventListener("DOMContentLoaded", function () {
   const cartContainer = document.getElementById("cart-items");
   const cartTotal = document.getElementById("cart-total");
@@ -35,9 +51,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const div = document.createElement("div");
       div.className = "cart-item";
       div.innerHTML = `
-        <img src="${item.image}" alt="${item.name}" />
+        <img src="${item.image}" alt="${item.color}" />
         <div class="item-info">
           <strong>${item.name}</strong><br />
+          Color: ${item.color}<br />
           $${item.price} x 
           <input type="number" value="${item.quantity}" min="1" class="quantity-input" onchange="updateQuantity(${index}, this.value)">
           <button onclick="removeItem(${index})">Remove</button>
@@ -50,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// ✅ Quantity and Removal Functions
 function updateQuantity(index, quantity) {
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   cart[index].quantity = parseInt(quantity);
