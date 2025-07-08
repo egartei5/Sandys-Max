@@ -99,7 +99,6 @@
     }
   </style>
 </head>
-
 <body>
   <header>
     <h1>Sandy's Max</h1>
@@ -110,148 +109,112 @@
       <a href="cart.html">Cart</a>
     </nav>
   </header>
-
   <main>
     <h2>Our Handbags</h2>
-
-    <!-- ✅ Updated New Fashion Styled Square Bag -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider1', 0)">Black and Beige</button>
-        <button onclick="showImage('slider1', 1)">Brown</button>
-        <button onclick="showImage('slider1', 2)">Brown with Black Straps</button>
-      </div>
-      <div id="slider1">
-        <img src="images/IMG_1600.JPG" class="active" alt="Black and Beige Handbag">
-        <img src="images/IMG_1601.JPG" alt="Brown Handbag">
-        <img src="images/IMG_1599.JPG" alt="Brown with Black Straps Handbag">
-      </div>
-      <h3>New Fashion Styled Square Bag</h3>
-      <p>Colors: Black and Beige, Brown, Brown with Black Straps</p>
-      <p>Stock: 5 pieces of each color</p>
-      <p>Price: $17.99</p>
-      <button onclick="addToCart('New Fashion Styled Square Bag', 17.99, getCurrentImage('slider1'))">Add to Cart</button>
-    </div>
-
-    <!-- ✅ Fashion Box Bags PU Handbags -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider2', 0)">White</button>
-        <button onclick="showImage('slider2', 1)">Khaki</button>
-        <button onclick="showImage('slider2', 2)">Brown</button>
-        <button onclick="showImage('slider2', 3)">Green</button>
-        <button onclick="showImage('slider2', 4)">Rose Red</button>
-        <button onclick="showImage('slider2', 5)">Blue</button>
-        <button onclick="showImage('slider2', 6)">Black</button>
-      </div>
-      <div id="slider2">
-        <img src="images/IMG_1522.JPG" class="active" alt="White Handbag">
-        <img src="images/IMG_1518.JPG" alt="Khaki Handbag">
-        <img src="images/IMG_1517.JPG" alt="Brown Handbag">
-        <img src="images/IMG_1519.JPG" alt="Green Handbag">
-        <img src="images/IMG_1520.JPG" alt="Rose Red Handbag">
-        <img src="images/IMG_1521.JPG" alt="Blue Handbag">
-        <img src="images/IMG_1516.JPG" alt="Black Handbag">
-      </div>
-      <h3>Fashion Box Bags PU Handbags</h3>
-      <p>Colors: White, Khaki, Brown, Green, Rose Red, Blue, Black</p>
-      <p>Stock: 5 pieces of each color</p>
-      <p>Price: $13.99</p>
-      <button onclick="addToCart('Fashion Box Bags PU Handbags', 13.99, getCurrentImage('slider2'))">Add to Cart</button>
-    </div>
-
-    <!-- ✅ Man's Large Capacity PU Material Chest Bag -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider3', 0)">Black</button>
-        <button onclick="showImage('slider3', 1)">Grey & Brown</button>
-        <button onclick="showImage('slider3', 2)">Black & Brown</button>
-        <button onclick="showImage('slider3', 3)">Blue & Brown</button>
-      </div>
-      <div id="slider3">
-        <img src="images/IMG_1536.JPG" class="active" alt="Black Chest Bag">
-        <img src="images/IMG_1533.JPG" alt="Grey & Brown Chest Bag">
-        <img src="images/IMG_1534.JPG" alt="Black & Brown Chest Bag">
-        <img src="images/IMG_1535.JPG" alt="Blue & Brown Chest Bag">
-      </div>
-      <h3>Man's Large Capacity PU Material Chest Bag with USB</h3>
-      <p>Colors: Black, Grey & Brown, Black & Brown, Blue & Brown</p>
-      <p>Stock: 5 pieces of each color</p>
-      <p>Price: $10.99</p>
-      <button onclick="addToCart('PU Chest Bag with USB', 10.99, getCurrentImage('slider3'))">Add to Cart</button>
-    </div>
-
-    <!-- ✅ Triangle Shaped High Quality Bags -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider4', 0)">Yellow</button>
-        <button onclick="showImage('slider4', 1)">Brown</button>
-        <button onclick="showImage('slider4', 2)">Blue & Pink</button>
-        <button onclick="showImage('slider4', 3)">Red</button>
-        <button onclick="showImage('slider4', 4)">Pink & Red</button>
-        <button onclick="showImage('slider4', 5)">Black</button>
-      </div>
-      <div id="slider4">
-        <img src="images/IMG_1544.JPG" class="active" alt="Yellow Triangle Bag">
-        <img src="images/IMG_1543.JPG" alt="Brown Triangle Bag">
-        <img src="images/IMG_1542.JPG" alt="Blue & Pink Triangle Bag">
-        <img src="images/IMG_1541.JPG" alt="Red Triangle Bag">
-        <img src="images/IMG_1540.JPG" alt="Pink & Red Triangle Bag">
-        <img src="images/IMG_1539.JPG" alt="Black Triangle Bag">
-      </div>
-      <h3>Triangle Shaped High Quality Bags</h3>
-      <p>Colors: Yellow, Brown, Blue & Pink, Red, Pink & Red, Black</p>
-      <p>Stock: 3 pieces of each color</p>
-      <p>Price: $13.52</p>
-      <button onclick="addToCart('Triangle Shaped High Quality Bags', 13.52, getCurrentImage('slider4'))">Add to Cart</button>
-    </div>
-
-    <!-- ✅ Kalanta OEM Genuine Leather Ladies Purses -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider5', 0)">Red</button>
-        <button onclick="showImage('slider5', 1)">Beige</button>
-        <button onclick="showImage('slider5', 2)">Black</button>
-      </div>
-      <div id="slider5">
-        <img src="images/IMG_1558.JPG" class="active" alt="Red Kalanta Purse">
-        <img src="images/IMG_1559.JPG" alt="Beige Kalanta Purse">
-        <img src="images/IMG_1560.JPG" alt="Black Kalanta Purse">
-      </div>
-      <h3>Kalanta OEM Genuine Leather Ladies Purses and Handbags</h3>
-      <p>Colors: Red, Beige, Black</p>
-      <p>Stock: 5 pieces of each color</p>
-      <p>Price: $26.78</p>
-      <button onclick="addToCart('Kalanta OEM Genuine Leather Ladies Purses', 26.78, getCurrentImage('slider5'))">Add to Cart</button>
-    </div>
-
-    <!-- ✅ Fashion Shoulder Phone Bag 2024 -->
-    <div class="product-card">
-      <div class="slider-buttons">
-        <button onclick="showImage('slider6', 0)">Red</button>
-        <button onclick="showImage('slider6', 1)">Brown</button>
-        <button onclick="showImage('slider6', 2)">Khaki</button>
-        <button onclick="showImage('slider6', 3)">Black</button>
-      </div>
-      <div id="slider6">
-        <img src="images/IMG_1530.JPG" class="active" alt="Red Shoulder Phone Bag">
-        <img src="images/IMG_1528.JPG" alt="Brown Shoulder Phone Bag">
-        <img src="images/IMG_1529.JPG" alt="Khaki Shoulder Phone Bag">
-        <img src="images/IMG_1527.JPG" alt="Black Shoulder Phone Bag">
-      </div>
-      <h3>Fashion Shoulder Phone Bag 2024</h3>
-      <p>Colors: Red, Brown, Khaki, Black</p>
-      <p>Stock: 4 pieces of each color</p>
-      <p>Price: $14.92</p>
-      <button onclick="addToCart('Fashion Shoulder Phone Bag 2024', 14.92, getCurrentImage('slider6'))">Add to Cart</button>
-    </div>
-
+    <!-- Product Cards -->
+    <div id="products"></div>
   </main>
-
   <footer>
     <p>Phone: 7019649823</p>
     <p>Email: Sandykoromago2store@gmail.com</p>
     <p>&copy; 2025 Sandy's Max. All rights reserved.</p>
   </footer>
+  <script>
+    const products = [
+      {
+        title: "New Fashion Styled Square Bag",
+        price: 17.99,
+        sliderId: "slider1",
+        images: [
+          { src: "images/IMG_1600.JPG", alt: "Black and Beige" },
+          { src: "images/IMG_1601.JPG", alt: "Brown" },
+          { src: "images/IMG_1599.JPG", alt: "Brown with Black Straps" },
+        ]
+      },
+      {
+        title: "Fashion Box Bags PU Handbags",
+        price: 13.99,
+        sliderId: "slider2",
+        images: [
+          { src: "images/IMG_1522.JPG", alt: "White" },
+          { src: "images/IMG_1518.JPG", alt: "Khaki" },
+          { src: "images/IMG_1517.JPG", alt: "Brown" },
+          { src: "images/IMG_1519.JPG", alt: "Green" },
+          { src: "images/IMG_1520.JPG", alt: "Rose Red" },
+          { src: "images/IMG_1521.JPG", alt: "Blue" },
+          { src: "images/IMG_1516.JPG", alt: "Black" },
+        ]
+      },
+      {
+        title: "PU Chest Bag with USB",
+        price: 10.99,
+        sliderId: "slider3",
+        images: [
+          { src: "images/IMG_1536.JPG", alt: "Black" },
+          { src: "images/IMG_1533.JPG", alt: "Grey & Brown" },
+          { src: "images/IMG_1534.JPG", alt: "Black & Brown" },
+          { src: "images/IMG_1535.JPG", alt: "Blue & Brown" },
+        ]
+      },
+      {
+        title: "Triangle Shaped High Quality Bags",
+        price: 13.52,
+        sliderId: "slider4",
+        images: [
+          { src: "images/IMG_1544.JPG", alt: "Yellow" },
+          { src: "images/IMG_1543.JPG", alt: "Brown" },
+          { src: "images/IMG_1542.JPG", alt: "Blue & Pink" },
+          { src: "images/IMG_1541.JPG", alt: "Red" },
+          { src: "images/IMG_1540.JPG", alt: "Pink & Red" },
+          { src: "images/IMG_1539.JPG", alt: "Black" },
+        ]
+      },
+      {
+        title: "Kalanta OEM Genuine Leather Ladies Purses",
+        price: 26.78,
+        sliderId: "slider5",
+        images: [
+          { src: "images/IMG_1558.JPG", alt: "Red" },
+          { src: "images/IMG_1559.JPG", alt: "Beige" },
+          { src: "images/IMG_1560.JPG", alt: "Black" },
+        ]
+      },
+      {
+        title: "Fashion Shoulder Phone Bag 2024",
+        price: 14.92,
+        sliderId: "slider6",
+        images: [
+          { src: "images/IMG_1530.JPG", alt: "Red" },
+          { src: "images/IMG_1528.JPG", alt: "Brown" },
+          { src: "images/IMG_1529.JPG", alt: "Khaki" },
+          { src: "images/IMG_1527.JPG", alt: "Black" },
+        ]
+      }
+    ];
+
+    const container = document.getElementById("products");
+    products.forEach(product => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+
+      const buttons = product.images.map((img, index) =>
+        `<button onclick="showImage('${product.sliderId}', ${index})">${img.alt}</button>`
+      ).join("");
+
+      const images = product.images.map((img, index) =>
+        `<img src="${img.src}" alt="${img.alt}" class="${index === 0 ? 'active' : ''}">`
+      ).join("");
+
+      card.innerHTML = `
+        <div class="slider-buttons">${buttons}</div>
+        <div id="${product.sliderId}">${images}</div>
+        <h3>${product.title}</h3>
+        <p>Price: $${product.price}</p>
+        <button onclick="addToCart('${product.title}', ${product.price}, getCurrentImage('${product.sliderId}'))">Add to Cart</button>
+      `;
+
+      container.appendChild(card);
+    });
+  </script>
 </body>
 </html>

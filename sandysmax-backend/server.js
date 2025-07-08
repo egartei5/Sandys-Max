@@ -21,7 +21,10 @@ const transporter = nodemailer.createTransport({
 // Send customer and admin confirmation emails
 async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount) {
   const itemList = cart.map(item =>
-    `<li>${item.quantity} × ${item.name} (${item.color}) - $${item.price.toFixed(2)}</li>`
+    `<li>
+      ${item.quantity} × ${item.name} (${item.color || 'No Color'}) - $${item.price.toFixed(2)}
+      <br><img src="${item.image}" alt="${item.name}" style="width:100px;margin-top:5px;" />
+    </li>`
   ).join('');
 
   const orderHtml = `
@@ -63,7 +66,7 @@ app.post('/create-payment-intent', async (req, res) => {
     }
 
     const cartSummary = cart.map(item =>
-      `${item.name} (${item.color}) x${item.quantity}`
+      `${item.name} (${item.color || 'No Color'}) x${item.quantity}`
     ).join(', ');
 
     const paymentIntent = await stripe.paymentIntents.create({

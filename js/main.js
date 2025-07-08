@@ -1,18 +1,9 @@
-// ✅ Get Active Image and Color
-function getCurrentImage(sliderId) {
-  const slider = document.getElementById(sliderId);
-  const activeImg = slider.querySelector("img.active");
-  return {
-    image: activeImg.src,
-    color: activeImg.alt || "Unknown"
-  };
-}
-
-// ✅ Add to Cart Function (with color)
-function addToCart(productName, price, imageData = {}) {
+// ✅ Add to Cart Function with Color Support
+function addToCart(productName, price, imageInfo = { image: "", color: "Unknown" }) {
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const existingItem = cart.find(item => item.name === productName && item.color === imageData.color);
+  // Check if same product with same color already exists
+  const existingItem = cart.find(item => item.name === productName && item.color === imageInfo.color);
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
@@ -20,13 +11,13 @@ function addToCart(productName, price, imageData = {}) {
       name: productName,
       price: price,
       quantity: 1,
-      image: imageData.image,
-      color: imageData.color
+      image: imageInfo.image,
+      color: imageInfo.color
     });
   }
 
   localStorage.setItem("cart", JSON.stringify(cart));
-  alert(`${productName} (${imageData.color}) added to cart!`);
+  alert(`${productName} (${imageInfo.color}) added to cart!`);
 }
 
 // ✅ Display Cart Items on cart.html
@@ -51,10 +42,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const div = document.createElement("div");
       div.className = "cart-item";
       div.innerHTML = `
-        <img src="${item.image}" alt="${item.color}" />
+        <img src="${item.image}" alt="${item.name}" />
         <div class="item-info">
           <strong>${item.name}</strong><br />
-          Color: ${item.color}<br />
+          <em>Color: ${item.color}</em><br />
           $${item.price} x 
           <input type="number" value="${item.quantity}" min="1" class="quantity-input" onchange="updateQuantity(${index}, this.value)">
           <button onclick="removeItem(${index})">Remove</button>
@@ -67,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// ✅ Quantity and Removal Functions
+// ✅ Update Quantity
 function updateQuantity(index, quantity) {
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   cart[index].quantity = parseInt(quantity);
@@ -75,6 +66,7 @@ function updateQuantity(index, quantity) {
   location.reload();
 }
 
+// ✅ Remove Item
 function removeItem(index) {
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
   cart.splice(index, 1);
@@ -82,6 +74,7 @@ function removeItem(index) {
   location.reload();
 }
 
+// ✅ Clear Cart
 function clearCart() {
   localStorage.removeItem("cart");
   location.reload();
