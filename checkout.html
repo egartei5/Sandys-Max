@@ -60,7 +60,7 @@
     cart.forEach(item => {
       const option = document.createElement("option");
       option.value = item.quantity;
-      option.textContent = `${item.name} x ${item.quantity}`;
+      option.textContent = `${item.name} (${item.color}) x ${item.quantity}`;
       quantityEl.appendChild(option);
     });
 
@@ -89,7 +89,12 @@
           customerEmail: email,
           customerName: name,
           shippingAddress: `${address}, ${state}, ${zip}`,
-          cart: cart
+          shippingLabel: `${name}, ${address}, ${state}, ${zip}`,
+          cart: cart.map(item => ({
+            name: `${item.name} (${item.color})`,
+            quantity: item.quantity,
+            price: item.price
+          }))
         })
       });
 
