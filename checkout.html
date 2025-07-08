@@ -1,3 +1,4 @@
+<!-- checkout.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,12 +90,7 @@
           customerEmail: email,
           customerName: name,
           shippingAddress: `${address}, ${state}, ${zip}`,
-          shippingLabel: `${name}, ${address}, ${state}, ${zip}`,
-          cart: cart.map(item => ({
-            name: `${item.name} (${item.color})`,
-            quantity: item.quantity,
-            price: item.price
-          }))
+          cart: cart // includes color
         })
       });
 
