@@ -1,164 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Checkout</title>
+  <meta charset="UTF-8" />
+  <title>Sandy's Max - Checkout</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     body {
       background-color: #ffe6f0;
       font-family: Arial, sans-serif;
     }
-
-    header, footer {
-      background-color: #e91e63;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-    }
-
-    nav a {
-      color: white;
-      margin: 0 10px;
-      text-decoration: none;
-    }
-
     .checkout-container {
-      max-width: 700px;
-      margin: 30px auto;
+      max-width: 600px;
+      margin: auto;
       padding: 20px;
       background-color: white;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     .item-row {
       display: flex;
+      gap: 10px;
       align-items: center;
-      gap: 15px;
       border-bottom: 1px solid #ddd;
-      padding: 15px 0;
+      padding: 10px 0;
     }
-
     .item-row img {
       width: 80px;
       height: 80px;
       object-fit: cover;
       border-radius: 8px;
     }
-
     .summary {
       font-weight: bold;
       margin-top: 20px;
-      font-size: 18px;
     }
-
+    input, #card-element {
+      padding: 10px;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
+      width: 100%;
+      padding: 12px;
       background-color: #e91e63;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #c2185b;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Checkout</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
-      <a href="cart.html">Cart</a>
-    </nav>
-  </header>
-
   <main class="checkout-container">
+    <h2>Order Summary</h2>
     <div id="order-summary"></div>
-    <div class="summary" id="total-price"></div>
+    <div class="summary">Subtotal: $<span id="subtotal">0.00</span></div>
+    <div class="summary">Tax: $4.00</div>
+    <div class="summary">Total: $<span id="total-price">0.00</span></div>
+
+    <h3>Shipping Information</h3>
+    <input type="text" id="customerName" placeholder="Full Name" required>
+    <input type="email" id="customerEmail" placeholder="Email Address" required>
+    <input type="text" id="shippingAddress" placeholder="Shipping Address" required>
+
+    <h3>Card Information</h3>
+    <div id="card-element"></div>
+
     <button onclick="submitOrder()">Place Order</button>
   </main>
 
-  <footer>
-    <p>&copy; 2025 Sandy's Max</p>
-  </footer>
-
   <script>
-    const orderSummary = document.getElementById("order-summary");
-    const totalPrice = document.getElementById("total-price");
+    const stripe = Stripe("pk_test_YOUR_PUBLIC_KEY"); // Replace with your real public key
+    const elements = stripe.elements();
+    const card = elements.create("card");
+    card.mount("#card-element");
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const orderSummary = document.getElementById("order-summary");
+    const subtotalEl = document.getElementById("subtotal");
+    const totalEl = document.getElementById("total-price");
+
     let subtotal = 0;
-    const tax = 4.00;
-
-    if (cart.length === 0) {
-      orderSummary.innerHTML = "<p>Your cart is empty.</p>";
-    } else {
-      cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        subtotal += itemTotal;
-        orderSummary.innerHTML += `
-          <div class="item-row">
-            <img src="${item.image}" alt="${item.name}" />
-            <div>
-              <strong>${item.name} - ${item.color}</strong><br/>
-              $${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}
-            </div>
+    cart.forEach(item => {
+      const totalItemPrice = item.price * item.quantity;
+      subtotal += totalItemPrice;
+      orderSummary.innerHTML += `
+        <div class="item-row">
+          <img src="${item.image}" alt="${item.name}">
+          <div>
+            <strong>${item.name}</strong><br>
+            <em>Color: ${item.color}</em><br>
+            $${item.price} x ${item.quantity} = $${totalItemPrice.toFixed(2)}
           </div>
-        `;
-      });
-
-      const total = subtotal + tax;
-      totalPrice.innerHTML = `
-        Subtotal: $${subtotal.toFixed(2)}<br>
-        Tax: $${tax.toFixed(2)}<br>
-        Total: $${total.toFixed(2)}
+        </div>
       `;
-    }
+    });
 
-    function submitOrder() {
-      const order = cart.map(item => ({
-        name: item.name,
-        color: item.color,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image
-      }));
+    subtotalEl.textContent = subtotal.toFixed(2);
+    const total = subtotal + 4;
+    totalEl.textContent = total.toFixed(2);
 
-      const customerEmail = prompt("Enter your email:");
-      const customerName = prompt("Enter your full name:");
-      const shippingAddress = prompt("Enter your shipping address:");
+    async function submitOrder() {
+      const customerName = document.getElementById("customerName").value;
+      const customerEmail = document.getElementById("customerEmail").value;
+      const shippingAddress = document.getElementById("shippingAddress").value;
 
-      fetch('/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      if (!customerName || !customerEmail || !shippingAddress) {
+        alert("Please fill in all the fields.");
+        return;
+      }
+
+      const res = await fetch("http://localhost:3000/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cart: order,
-          amount: Math.round((subtotal + tax) * 100),
+          amount: Math.round(total * 100),
+          cart,
           customerEmail,
           customerName,
           shippingAddress
         })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.clientSecret) {
-          alert("✅ Order placed! A confirmation email has been sent.");
-          localStorage.removeItem("cart");
-          window.location.href = "thankyou.html";
-        } else {
-          alert("❌ Order failed. Please try again.");
-        }
-      })
-      .catch(error => {
-        console.error("Server error:", error);
-        alert("⚠️ Server error. Check your internet or try again later.");
       });
+
+      const data = await res.json();
+
+      const result = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+          card: card,
+          billing_details: {
+            name: customerName,
+            email: customerEmail,
+            address: { line1: shippingAddress }
+          }
+        }
+      });
+
+      if (result.error) {
+        alert(result.error.message);
+      } else if (result.paymentIntent.status === 'succeeded') {
+        alert("Payment successful! Thank you for your order.");
+        localStorage.removeItem("cart");
+        window.location.href = "thankyou.html";
+      }
     }
   </script>
 </body>

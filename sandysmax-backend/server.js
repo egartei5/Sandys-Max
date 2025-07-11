@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Email setup
+// ✅ Email Transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Send customer and admin confirmation emails
+// ✅ Send Email to Customer and Admin
 async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount) {
   const itemList = cart.map(item =>
     `<li>
@@ -48,7 +48,7 @@ async function sendOrderEmails(cart, customerEmail, customerName, shippingAddres
     html: orderHtml,
   });
 
-  // Send email to store owner
+  // Send email to Sandy's Max admin
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: 'sandykoromago2store@gmail.com',
@@ -57,6 +57,7 @@ async function sendOrderEmails(cart, customerEmail, customerName, shippingAddres
   });
 }
 
+// ✅ Payment Intent Route
 app.post('/create-payment-intent', async (req, res) => {
   try {
     const { amount, cart, customerEmail, customerName, shippingAddress } = req.body;
@@ -75,9 +76,7 @@ app.post('/create-payment-intent', async (req, res) => {
       description: `Order from Sandy's Max by ${customerName}`,
       shipping: {
         name: customerName,
-        address: {
-          line1: shippingAddress,
-        }
+        address: { line1: shippingAddress }
       },
       receipt_email: customerEmail,
       metadata: {
@@ -94,10 +93,11 @@ app.post('/create-payment-intent', async (req, res) => {
 
     res.send({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error("Payment error:", error);
+    console.error("❌ Payment error:", error);
     res.status(500).send({ error: error.message });
   }
 });
 
+// ✅ Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
