@@ -73,11 +73,11 @@
     <h3>Card Information</h3>
     <div id="card-element"></div>
 
-    <button onclick="submitOrder()">Place Order</button>
+    <button id="placeOrderBtn" onclick="submitOrder()">Place Order</button>
   </main>
 
   <script>
-    const stripe = Stripe("pk_test_YOUR_PUBLIC_KEY"); // Replace with your real public key
+    const stripe = Stripe("pk_live_51RNjrlFZYifFS4DgmRbtwsOUisnpLgHF8hHvfUaH8yxtulWKmOY3DB5Q6gYhzlPSSOhMMQQ0BUsoZ8rndMJ2Icmi00szW9JlyA");
     const elements = stripe.elements();
     const card = elements.create("card");
     card.mount("#card-element");
@@ -108,46 +108,62 @@
     totalEl.textContent = total.toFixed(2);
 
     async function submitOrder() {
+      const btn = document.getElementById("placeOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "Processing...";
+
       const customerName = document.getElementById("customerName").value;
       const customerEmail = document.getElementById("customerEmail").value;
       const shippingAddress = document.getElementById("shippingAddress").value;
 
       if (!customerName || !customerEmail || !shippingAddress) {
         alert("Please fill in all the fields.");
+        btn.disabled = false;
+        btn.textContent = "Place Order";
         return;
       }
 
-      const res = await fetch("http://localhost:3000/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: Math.round(total * 100),
-          cart,
-          customerEmail,
-          customerName,
-          shippingAddress
-        })
-      });
+      try {
+        const res = await fetch("https://sandysmax-backend.onrender.com/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: Math.round(total * 100),
+            cart,
+            customerEmail,
+            customerName,
+            shippingAddress
+          })
+        });
 
-      const data = await res.json();
+        const data = await res.json();
+        if (!data.clientSecret) throw new Error("No client secret returned");
 
-      const result = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: card,
-          billing_details: {
-            name: customerName,
-            email: customerEmail,
-            address: { line1: shippingAddress }
+        const result = await stripe.confirmCardPayment(data.clientSecret, {
+          payment_method: {
+            card: card,
+            billing_details: {
+              name: customerName,
+              email: customerEmail,
+              address: { line1: shippingAddress }
+            }
           }
-        }
-      });
+        });
 
-      if (result.error) {
-        alert(result.error.message);
-      } else if (result.paymentIntent.status === 'succeeded') {
-        alert("Payment successful! Thank you for your order.");
-        localStorage.removeItem("cart");
-        window.location.href = "thankyou.html";
+        if (result.error) {
+          alert(result.error.message);
+          btn.disabled = false;
+          btn.textContent = "Place Order";
+        } else if (result.paymentIntent.status === 'succeeded') {
+          alert("✅ Payment successful!");
+          localStorage.removeItem("cart");
+          window.location.href = "thankyou.html";
+        }
+      } catch (error) {
+        console.error("Checkout error:", error);
+        alert("⚠️ Server error. Please try again.");
+        btn.disabled = false;
+        btn.textContent = "Place Order";
       }
     }
   </script>
