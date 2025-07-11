@@ -5,35 +5,79 @@
   <title>Checkout</title>
   <link rel="stylesheet" href="style.css" />
   <style>
+    body {
+      background-color: #fce4ec;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+
+    header, footer {
+      background-color: #e91e63;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
     .checkout-container {
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
       padding: 20px;
       background-color: white;
+      border-radius: 10px;
     }
 
     .item-row {
+      display: flex;
+      align-items: center;
       border-bottom: 1px solid #ddd;
       padding: 10px 0;
+    }
+
+    .item-row img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-right: 15px;
     }
 
     .summary {
       font-weight: bold;
       margin-top: 20px;
+      font-size: 18px;
+      text-align: right;
     }
 
     button {
-      margin-top: 20px;
-      padding: 10px 15px;
+      margin-top: 25px;
+      padding: 10px 20px;
       background-color: #e91e63;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      display: block;
+      margin-left: auto;
     }
 
     button:hover {
       background-color: #c2185b;
+    }
+
+    @media (max-width: 600px) {
+      .item-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .item-row img {
+        margin-bottom: 10px;
+      }
+
+      button {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -44,7 +88,9 @@
 
   <main class="checkout-container">
     <div id="order-summary"></div>
-    <div class="summary">Total: $<span id="total-price">0.00</span></div>
+    <div class="summary" id="subtotal">Subtotal: $0.00</div>
+    <div class="summary">Tax: $4.00</div>
+    <div class="summary"><strong>Total: $<span id="total-price">4.00</span></strong></div>
     <button onclick="submitOrder()">Place Order</button>
   </main>
 
@@ -55,25 +101,32 @@
   <script>
     const orderSummary = document.getElementById("order-summary");
     const totalPrice = document.getElementById("total-price");
+    const subtotalElement = document.getElementById("subtotal");
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let total = 0;
+    let subtotal = 0;
 
     if (cart.length === 0) {
       orderSummary.innerHTML = "<p>Your cart is empty.</p>";
     } else {
       cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
-        total += itemTotal;
+        subtotal += itemTotal;
+
         orderSummary.innerHTML += `
           <div class="item-row">
-            <strong>${item.name} - ${item.color}</strong><br/>
-            $${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}
+            <img src="${item.image}" alt="${item.name}" />
+            <div>
+              <strong>${item.name} - ${item.color || 'No Color'}</strong><br/>
+              $${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}
+            </div>
           </div>
         `;
       });
 
-      totalPrice.textContent = total.toFixed(2);
+      const totalWithTax = subtotal + 4;
+      subtotalElement.textContent = `Subtotal: $${subtotal.toFixed(2)}`;
+      totalPrice.textContent = totalWithTax.toFixed(2);
     }
 
     function submitOrder() {
@@ -81,15 +134,13 @@
         name: item.name,
         color: item.color,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        image: item.image
       }));
 
-      // Send to your backend
       fetch('/create-checkout-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order })
       })
       .then(res => res.json())
