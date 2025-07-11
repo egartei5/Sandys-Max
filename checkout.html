@@ -6,91 +6,81 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
-      background-color: #fce4ec;
+      background-color: #ffe6f0;
       font-family: Arial, sans-serif;
-      margin: 0;
     }
 
     header, footer {
       background-color: #e91e63;
       color: white;
-      padding: 20px;
+      padding: 10px 20px;
       text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
     }
 
     .checkout-container {
       max-width: 700px;
-      margin: auto;
+      margin: 30px auto;
       padding: 20px;
       background-color: white;
       border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     .item-row {
       display: flex;
       align-items: center;
+      gap: 15px;
       border-bottom: 1px solid #ddd;
-      padding: 10px 0;
+      padding: 15px 0;
     }
 
     .item-row img {
       width: 80px;
       height: 80px;
       object-fit: cover;
-      border-radius: 6px;
-      margin-right: 15px;
+      border-radius: 8px;
     }
 
     .summary {
       font-weight: bold;
       margin-top: 20px;
       font-size: 18px;
-      text-align: right;
     }
 
     button {
-      margin-top: 25px;
+      margin-top: 20px;
       padding: 10px 20px;
       background-color: #e91e63;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
-      display: block;
-      margin-left: auto;
     }
 
     button:hover {
       background-color: #c2185b;
-    }
-
-    @media (max-width: 600px) {
-      .item-row {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .item-row img {
-        margin-bottom: 10px;
-      }
-
-      button {
-        width: 100%;
-        text-align: center;
-      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Checkout</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="cart.html">Cart</a>
+    </nav>
   </header>
 
   <main class="checkout-container">
     <div id="order-summary"></div>
-    <div class="summary" id="subtotal">Subtotal: $0.00</div>
-    <div class="summary">Tax: $4.00</div>
-    <div class="summary"><strong>Total: $<span id="total-price">4.00</span></strong></div>
+    <div class="summary" id="total-price"></div>
     <button onclick="submitOrder()">Place Order</button>
   </main>
 
@@ -101,10 +91,10 @@
   <script>
     const orderSummary = document.getElementById("order-summary");
     const totalPrice = document.getElementById("total-price");
-    const subtotalElement = document.getElementById("subtotal");
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     let subtotal = 0;
+    const tax = 4.00;
 
     if (cart.length === 0) {
       orderSummary.innerHTML = "<p>Your cart is empty.</p>";
@@ -112,21 +102,23 @@
       cart.forEach(item => {
         const itemTotal = item.price * item.quantity;
         subtotal += itemTotal;
-
         orderSummary.innerHTML += `
           <div class="item-row">
             <img src="${item.image}" alt="${item.name}" />
             <div>
-              <strong>${item.name} - ${item.color || 'No Color'}</strong><br/>
+              <strong>${item.name} - ${item.color}</strong><br/>
               $${item.price} x ${item.quantity} = $${itemTotal.toFixed(2)}
             </div>
           </div>
         `;
       });
 
-      const totalWithTax = subtotal + 4;
-      subtotalElement.textContent = `Subtotal: $${subtotal.toFixed(2)}`;
-      totalPrice.textContent = totalWithTax.toFixed(2);
+      const total = subtotal + tax;
+      totalPrice.innerHTML = `
+        Subtotal: $${subtotal.toFixed(2)}<br>
+        Tax: $${tax.toFixed(2)}<br>
+        Total: $${total.toFixed(2)}
+      `;
     }
 
     function submitOrder() {
@@ -138,18 +130,35 @@
         image: item.image
       }));
 
-      fetch('/create-checkout-session', {
+      const customerEmail = prompt("Enter your email:");
+      const customerName = prompt("Enter your full name:");
+      const shippingAddress = prompt("Enter your shipping address:");
+
+      fetch('/create-payment-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order })
+        body: JSON.stringify({
+          cart: order,
+          amount: Math.round((subtotal + tax) * 100),
+          customerEmail,
+          customerName,
+          shippingAddress
+        })
       })
       .then(res => res.json())
       .then(data => {
-        if (data.url) {
-          window.location.href = data.url;
+        if (data.clientSecret) {
+          alert("✅ Order placed! A confirmation email has been sent.");
+          localStorage.removeItem("cart");
+          window.location.href = "thankyou.html";
+        } else {
+          alert("❌ Order failed. Please try again.");
         }
       })
-      .catch(error => console.error('Error:', error));
+      .catch(error => {
+        console.error("Server error:", error);
+        alert("⚠️ Server error. Check your internet or try again later.");
+      });
     }
   </script>
 </body>

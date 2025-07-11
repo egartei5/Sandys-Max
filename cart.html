@@ -6,63 +6,68 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
-      background-color: #fce4ec;
-      margin: 0;
+      background-color: #ffe6f0;
       font-family: Arial, sans-serif;
     }
-    header {
+
+    header, footer {
       background-color: #e91e63;
       color: white;
-      padding: 20px;
+      padding: 10px 20px;
       text-align: center;
     }
+
     nav a {
       color: white;
       margin: 0 10px;
       text-decoration: none;
-      font-weight: bold;
     }
-    nav a:hover {
-      text-decoration: underline;
-    }
+
     .cart-container {
       max-width: 700px;
-      margin: auto;
+      margin: 30px auto;
       padding: 20px;
       background-color: white;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     .cart-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 15px;
       border-bottom: 1px solid #ccc;
-      padding: 10px 0;
+      padding: 15px 0;
     }
+
     .cart-item img {
       width: 80px;
       height: 80px;
       object-fit: cover;
-      margin-right: 10px;
-      border-radius: 6px;
+      border-radius: 8px;
     }
+
     .item-info {
       flex-grow: 1;
     }
+
     .quantity-input {
-      width: 40px;
+      width: 50px;
     }
-    .cart-total {
+
+    .cart-summary {
       text-align: right;
-      margin-top: 20px;
       font-weight: bold;
       font-size: 18px;
+      margin-top: 20px;
     }
+
     .buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px;
+      margin-top: 25px;
     }
+
     .buttons button {
       padding: 10px 20px;
       background-color: #e91e63;
@@ -71,22 +76,15 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .buttons button:hover {
       background-color: #c2185b;
     }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background-color: #e91e63;
-      color: white;
-    }
+
     @media (max-width: 600px) {
       .cart-item {
         flex-direction: column;
         align-items: flex-start;
-      }
-      .cart-item img {
-        margin-bottom: 10px;
       }
     }
   </style>
@@ -103,9 +101,11 @@
 
   <main class="cart-container">
     <div id="cart-items"></div>
-    <div class="cart-total">Subtotal: $<span id="cart-subtotal">0.00</span></div>
-    <div class="cart-total">Tax: $<span id="cart-tax">0.00</span></div>
-    <div class="cart-total">Total: $<span id="cart-total">0.00</span></div>
+    <div class="cart-summary" id="cart-summary">
+      Subtotal: $0.00<br>
+      Tax: $4.00<br>
+      Total: $4.00
+    </div>
     <div class="buttons">
       <button onclick="clearCart()">Clear Cart</button>
       <button onclick="location.href='checkout.html'">Checkout</button>
@@ -118,14 +118,19 @@
 
   <script>
     const cartItemsContainer = document.getElementById("cart-items");
-    const cartSubtotal = document.getElementById("cart-subtotal");
-    const cartTax = document.getElementById("cart-tax");
-    const cartTotal = document.getElementById("cart-total");
+    const cartSummary = document.getElementById("cart-summary");
 
     function loadCart() {
       const cart = JSON.parse(localStorage.getItem("cart")) || [];
       cartItemsContainer.innerHTML = "";
       let subtotal = 0;
+      const tax = 4.00;
+
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
+        cartSummary.innerHTML = "Subtotal: $0.00<br>Tax: $4.00<br>Total: $4.00";
+        return;
+      }
 
       cart.forEach((item, index) => {
         subtotal += item.price * item.quantity;
@@ -133,7 +138,7 @@
           <div class="cart-item">
             <img src="${item.image}" alt="${item.name}" />
             <div class="item-info">
-              <strong>${item.name} - ${item.color || 'No Color'}</strong><br />
+              <strong>${item.name} - ${item.color}</strong><br />
               $${item.price} x 
               <input type="number" class="quantity-input" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
               <button onclick="removeItem(${index})">Remove</button>
@@ -142,11 +147,12 @@
         `;
       });
 
-      const tax = 4.00;
       const total = subtotal + tax;
-      cartSubtotal.textContent = subtotal.toFixed(2);
-      cartTax.textContent = tax.toFixed(2);
-      cartTotal.textContent = total.toFixed(2);
+      cartSummary.innerHTML = `
+        Subtotal: $${subtotal.toFixed(2)}<br>
+        Tax: $${tax.toFixed(2)}<br>
+        Total: $${total.toFixed(2)}
+      `;
     }
 
     function updateQuantity(index, quantity) {
