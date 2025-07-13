@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -9,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Email Transporter
+// ✅ Email setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -18,8 +17,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Send Email to Customer and Admin
-async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount) {
+// ✅ Send order confirmation emails
+async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, customerPhone, customerState, totalAmount) {
   const itemList = cart.map(item =>
     `<li>
       ${item.quantity} × ${item.name} (${item.color || 'No Color'}) - $${item.price.toFixed(2)}
@@ -27,42 +26,49 @@ async function sendOrderEmails(cart, customerEmail, customerName, shippingAddres
     </li>`
   ).join('');
 
-  const orderHtml = `
+  const html = `
     <h2>Order Confirmation - Sandy's Max</h2>
-    <p>Hi ${customerName},</p>
-    <p>Thanks for your order! Here's what we received:</p>
-    <h3>Shipping Info:</h3>
-    <p>${shippingAddress}</p>
-    <h3>Items:</h3>
+    <p><strong>Customer Name:</strong> ${customerName}</p>
+    <p><strong>Email:</strong> ${customerEmail}</p>
+    <p><strong>Phone:</strong> ${customerPhone}</p>
+    <p><strong>Shipping Address:</strong> ${shippingAddress}, ${customerState}</p>
+    <h3>Items Ordered:</h3>
     <ul>${itemList}</ul>
-    <p><strong>Total Charged:</strong> $${totalAmount.toFixed(2)}</p>
-    <p>Your order is now being processed. We'll notify you once it's shipped.</p>
-    <p>Thank you for shopping with Sandy's Max!</p>
+    <p><strong>Total:</strong> $${totalAmount.toFixed(2)}</p>
+    <p>We’ll notify you when it ships. Thank you for shopping with us!</p>
   `;
 
-  // Send email to customer
+  // Send to customer
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: customerEmail,
     subject: "Your Sandy's Max Order Receipt",
-    html: orderHtml,
+    html,
   });
 
-  // Send email to Sandy's Max admin
+  // Send to admin/store owner
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: 'sandykoromago2store@gmail.com',
     subject: `New Order from ${customerName}`,
-    html: orderHtml,
+    html,
   });
 }
 
-// ✅ Payment Intent Route
+// ✅ Payment & Email API
 app.post('/create-payment-intent', async (req, res) => {
   try {
-    const { amount, cart, customerEmail, customerName, shippingAddress } = req.body;
+    const {
+      amount,
+      cart,
+      customerEmail,
+      customerName,
+      shippingAddress,
+      customerPhone,
+      customerState
+    } = req.body;
 
-    if (!amount || !cart || !customerEmail || !customerName || !shippingAddress) {
+    if (!amount || !cart || !customerEmail || !customerName || !shippingAddress || !customerState) {
       return res.status(400).send({ error: "Missing required fields." });
     }
 
@@ -76,24 +82,39 @@ app.post('/create-payment-intent', async (req, res) => {
       description: `Order from Sandy's Max by ${customerName}`,
       shipping: {
         name: customerName,
-        address: { line1: shippingAddress }
+        address: {
+          line1: shippingAddress,
+          state: customerState,
+        }
       },
       receipt_email: customerEmail,
       metadata: {
         customerName,
         customerEmail,
-        shippingLabel: shippingAddress,
+        customerPhone,
+        shippingAddress,
+        customerState,
         products: cartSummary
       },
       automatic_payment_methods: { enabled: true }
     });
 
     const totalAmount = amount / 100;
-    await sendOrderEmails(cart, customerEmail, customerName, shippingAddress, totalAmount);
+
+    await sendOrderEmails(
+      cart,
+      customerEmail,
+      customerName,
+      shippingAddress,
+      customerPhone,
+      customerState,
+      totalAmount
+    );
 
     res.send({ clientSecret: paymentIntent.client_secret });
+
   } catch (error) {
-    console.error("❌ Payment error:", error);
+    console.error("Payment error:", error);
     res.status(500).send({ error: error.message });
   }
 });
