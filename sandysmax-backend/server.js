@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // ✅ Send order confirmation emails
-async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, customerPhone, customerState, totalAmount) {
+async function sendOrderEmails(cart, customerEmail, customerName, shippingAddress, customerPhone, customerCity, customerState, customerZip, totalAmount) {
   const itemList = cart.map(item =>
     `<li>
       ${item.quantity} × ${item.name} (${item.color || 'No Color'}) - $${item.price.toFixed(2)}
@@ -31,7 +31,7 @@ async function sendOrderEmails(cart, customerEmail, customerName, shippingAddres
     <p><strong>Customer Name:</strong> ${customerName}</p>
     <p><strong>Email:</strong> ${customerEmail}</p>
     <p><strong>Phone:</strong> ${customerPhone}</p>
-    <p><strong>Shipping Address:</strong> ${shippingAddress}, ${customerState}</p>
+    <p><strong>Shipping Address:</strong> ${shippingAddress}, ${customerCity}, ${customerState}, ${customerZip}</p>
     <h3>Items Ordered:</h3>
     <ul>${itemList}</ul>
     <p><strong>Total:</strong> $${totalAmount.toFixed(2)}</p>
@@ -46,7 +46,7 @@ async function sendOrderEmails(cart, customerEmail, customerName, shippingAddres
     html,
   });
 
-  // Send to admin/store owner
+  // Send to store
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: 'sandykoromago2store@gmail.com',
@@ -63,12 +63,14 @@ app.post('/create-payment-intent', async (req, res) => {
       cart,
       customerEmail,
       customerName,
-      shippingAddress,
       customerPhone,
-      customerState
+      shippingAddress,
+      customerCity,
+      customerState,
+      customerZip
     } = req.body;
 
-    if (!amount || !cart || !customerEmail || !customerName || !shippingAddress || !customerState) {
+    if (!amount || !cart || !customerEmail || !customerName || !shippingAddress || !customerCity || !customerState || !customerZip) {
       return res.status(400).send({ error: "Missing required fields." });
     }
 
@@ -84,7 +86,9 @@ app.post('/create-payment-intent', async (req, res) => {
         name: customerName,
         address: {
           line1: shippingAddress,
+          city: customerCity,
           state: customerState,
+          postal_code: customerZip,
         }
       },
       receipt_email: customerEmail,
@@ -93,7 +97,9 @@ app.post('/create-payment-intent', async (req, res) => {
         customerEmail,
         customerPhone,
         shippingAddress,
+        customerCity,
         customerState,
+        customerZip,
         products: cartSummary
       },
       automatic_payment_methods: { enabled: true }
@@ -107,14 +113,16 @@ app.post('/create-payment-intent', async (req, res) => {
       customerName,
       shippingAddress,
       customerPhone,
+      customerCity,
       customerState,
+      customerZip,
       totalAmount
     );
 
     res.send({ clientSecret: paymentIntent.client_secret });
 
   } catch (error) {
-    console.error("Payment error:", error);
+    console.error("❌ Payment error:", error);
     res.status(500).send({ error: error.message });
   }
 });

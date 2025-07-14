@@ -134,7 +134,7 @@
 
       cart.forEach((item, index) => {
         subtotal += item.price * item.quantity;
-        cartItemsContainer.innerHTML += `
+        const itemHTML = `
           <div class="cart-item">
             <img src="${item.image}" alt="${item.name}" />
             <div class="item-info">
@@ -145,6 +145,7 @@
             </div>
           </div>
         `;
+        cartItemsContainer.innerHTML += itemHTML;
       });
 
       const total = subtotal + tax;
